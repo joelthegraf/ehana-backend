@@ -1,0 +1,45 @@
+#!/bin/bash
+
+# Check Dependencies for pre-commit
+TOOLS=(
+	go
+	goimports
+)
+for tool in "${TOOLS[@]}"; do
+	if ! command -v $tool &> /dev/null; then
+		echo "$tool is required, please install it!"
+		exit 1
+	fi
+done
+
+
+# Get Source Files
+STAGED_GO_FILES=$(git diff --cached --name-only | grep ".go$")
+
+# Analyze Source Files
+for file in $STAGED_GO_FILES; do
+	go vet $file
+	if [[ $? -ne 0 ]]; then
+		exit 1
+	fi
+done
+
+# Clean and Format Source Files
+for file in $STAGED_GO_FILES; do
+	goimports -w $file
+	go fmt $file
+	git add $file
+done
+
+# Tidy go.mod and Update go.sum
+GO_MOD=$(git diff --cached --name-only | grep ".mod$")
+if [[ $GO_MOD ]]; then
+	go mod tidy
+	git add $GO_MOD
+fi
+
+GO_SUM=$(git diff --cached --name-only | grep ".sum$")
+if [[ $GO_SUM ]]; then
+	git add $GO_SUM
+fi
+

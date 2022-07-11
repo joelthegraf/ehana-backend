@@ -20,6 +20,7 @@ STAGED_GO_FILES=$(git diff --cached --name-only | grep ".go$")
 for file in $STAGED_GO_FILES; do
 	go vet $file
 	if [[ $? -ne 0 ]]; then
+		echo "Source files did not pass the analysis, please check!"
 		exit 1
 	fi
 done

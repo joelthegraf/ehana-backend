@@ -43,4 +43,3 @@ GO_SUM=$(git diff --cached --name-only | grep ".sum$")
 if [[ $GO_SUM ]]; then
 	git add $GO_SUM
 fi
-
